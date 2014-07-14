@@ -14,12 +14,14 @@ var palindromeCheck = function (n) {
     palLength = String(n).length
     var i = 0;
     
+    /* Get the first half. */
     if (!isNaN(n) && palLength % 2 === 0) {
         while (palHalf1.length < palLength / 2) {
             palHalf1.push(String(n)[i]);
             i++;
         }
-        /* Now do the same thing in reverse. */
+        
+        /* Now do the same thing in reverse to get the last half in reverse order. Therefore half 1 and half 2 should match if it is a palindrome. */
         i = palLength - 1;
         
         while (palHalf2.length < palHalf1.length) {
@@ -45,44 +47,61 @@ var palindromeCheck = function (n) {
         return "Error: NaN";
     }
     
-    /* Here I convert the two palindrome half arrays into strings so that I can make a simple comparison. */
+    /* Here I convert the two palindrome half arrays into strings so that I can make a simple comparison.
+    Important: I re-initialize the palHalf variables so that they can be used two or more times. */
     if (String(palHalf1) === String(palHalf2)) {
+        palHalf1 = [];
+        palHalf2 = [];
         return true;
     }
     else {
+        palHalf1 = [];
+        palHalf2 = [];
         return false;
     }
 };
 
-/* Now to find the largest palindrome. I'm going to work with two digit solutions because I assume it will be easier on my machine, and because I have the answer already. */
+/* Now to find the -largest- palindrome. */
 
 var findLargestPal = function (n1, n2) {
     var product;
-    var n2reset = n2;
-    
-    while (n1 > 9) {
-        while (n2 > 9) { // I would change these to 99 for the real problem.
-            product = n1 * n2;
+    var n2reset = n2; // Store the value of n2 so that it can be reset later when decrementing it.
+    var palindromes = []; // Array for all the palindromes found. This is necessary because if it simply stops at the first one found, you may miss larger palindromes.
+    var factors = []; // This isn't necessary to solve the problem, but I wanted to know what the factors are that make the palindrome.
+       
+    while (n1 > 99) {
+        while (n2 > 99) { 
+            product = n1 * n2; // These nested while loops will multiply together EVERY three digit number. If I wanted it to be every two digit number, I'd change these to n1 > 9, n2 > 9, and I'd enter 99,99 as arguments to the function.
             
-            /* Here's where things are not working. I still haven't figured out the problem.
-            if (palindromeCheck(product)) {
-                n1 = 9; // I don't guess these next two lines are necessary, but I don't know what's up.
-                n2 = 9;
-                return product;
+            if (palindromeCheck(product)) { 
+                palindromes.push(product);
+                palindromes.sort(function(a, b){return b-a}) // This way, the first entry in the array is always the largest one.
+                
+                if (product === palindromes[0]) {
+                    factors = [n1, n2];
+                }
+                
+                n2--;
             }
             else if (!palindromeCheck(product)) {
                 n2--;
             }
             else {
-                return "Error unknown?";
-            } */
+                return "Unknown error";
+            } 
         }
         
         n2 = n2reset;
         n1--;
-    } // These nested while loops successfully find every two digit product!
+    }
     
-    return "No palindromes found.";
+    if (palindromes.length > 0) {
+        return factors[0] + " x " + factors[1] + " = " + palindromes[0];
+    }
+    else {
+        return "No palindromes found.";
+    }
 }
 
-findLargestPal(99,99); // I would change these to 999,999 for the real problem.
+console.log("The largest palindrome made from the product of two 3-digit numbers is: " + findLargestPal(999,999));
+// This prints: "The largest palindrome made from the product of two 3-digit numbers is: 913 x 993 = 906609" which is the correct solution.
